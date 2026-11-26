@@ -2,7 +2,7 @@ const authorized = require('./_auth');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  if (!authorized(req)) return res.status(401).json({ error: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវ' });
+  if (!authorized(req, 'music', 5)) return res.status(429).json({ error: 'ប្រើច្រើនពេក (អតិបរមា 5 ចម្រៀងក្នុងមួយម៉ោង) សូមរង់ចាំ' });
   if (!process.env.ELEVENLABS_API_KEY) return res.status(500).json({ error: 'ខ្វះ ELEVENLABS_API_KEY' });
 
   const { lyrics, style, lang, seconds } = req.body || {};

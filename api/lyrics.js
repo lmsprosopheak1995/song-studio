@@ -2,7 +2,7 @@ const authorized = require('./_auth');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  if (!authorized(req)) return res.status(401).json({ error: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវ' });
+  if (!authorized(req, 'lyrics', 20)) return res.status(429).json({ error: 'ប្រើច្រើនពេក សូមរង់ចាំមួយម៉ោង' });
   if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'ខ្វះ ANTHROPIC_API_KEY' });
 
   const { topic, genre, mood, lang, length } = req.body || {};

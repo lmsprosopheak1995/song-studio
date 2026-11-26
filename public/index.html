@@ -136,10 +136,6 @@ a.dl:active{transform:translateY(3px);box-shadow:none}
   </div>
 
   <div class="card tilt">
-    <div class="lock"><span>🔒</span><input id="pw" type="password" placeholder="ពាក្យសម្ងាត់កម្មវិធី" autocomplete="current-password"></div>
-  </div>
-
-  <div class="card tilt">
     <h2 class="ct"><span class="badge">1</span>តែងអត្ថបទចម្រៀង</h2>
     <label for="topic">ប្រធានបទ / ដំណើររឿង</label>
     <textarea id="topic" placeholder="ឧ. ស្រលាញ់ម្តាយ, ផ្ទះកំណើត…"></textarea>
@@ -175,7 +171,6 @@ a.dl:active{transform:translateY(3px);box-shadow:none}
 
 <script>
 const $=id=>document.getElementById(id);
-$("pw").value=sessionStorage.getItem("pw")||"";
 
 /* chips */
 ["ស្រលាញ់ម្តាយ","ស្រុកកំណើត","ស្នេហាដំបូង","មិត្តភក្តិ","អ្នកឆ្ងាយ","បុណ្យភ្ជុំបិណ្ឌ","ក្តីសង្ឃឹម"].forEach(t=>{
@@ -194,8 +189,7 @@ if(matchMedia("(hover:hover) and (pointer:fine)").matches){
 
 /* API */
 async function call(url,body){
-  sessionStorage.setItem("pw",$("pw").value);
-  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-app-password":$("pw").value},body:JSON.stringify(body)});
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   if(!r.ok){let e="មានបញ្ហា";try{e=(await r.json()).error||e}catch(_){}throw new Error(e)}
   return r;
 }
