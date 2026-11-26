@@ -18,3 +18,12 @@
 - ប្រវែងចម្រៀងកំណត់ត្រឹម 150 វិនាទី ដើម្បីមិនឱ្យហួសកម្រិត response 4.5MB របស់ Vercel Functions។
 - គុណភាពសំឡេងច្រៀងភាសាខ្មែរ អាស្រ័យលើម៉ូដែលរបស់ ElevenLabs — សាកល្បងជាមួយ English ផងដែរ ហើយប្តូរ model ប្រៀបធៀប។
 - ការប្រើប្រាស់នីមួយៗចំណាយ credits ។ កុំចែក APP_PASSWORD ទៅអ្នកដែលមិនទុកចិត្ត។
+
+## ជ្រើសសេវាតន្ត្រី (MUSIC_PROVIDER)
+| តម្លៃ | Env ដែលត្រូវការ | កំណត់ចំណាំ |
+|---|---|---|
+| `lyria` | `GEMINI_API_KEY` | Google Lyria 3 (preview) តាម Gemini API — សំឡេងត្រឡប់ភ្លាមៗ |
+| `songup` | `SONGUP_API_KEY` | SongUp AI — ដំណើរការ 1–3 នាទី; ត្រូវផ្ទៀងផ្ទាត់ឈ្មោះវាលនឹង OpenAPI |
+| `elevenlabs` | `ELEVENLABS_API_KEY` | ElevenLabs Music — ភាសាខ្មែរមិនមានក្នុងបញ្ជីផ្លូវការ |
+
+ប្តូរសេវាដោយកែ `MUSIC_PROVIDER` ក្នុង Vercel ហើយ Redeploy។ សាកល្បងអត្ថបទខ្មែរដូចគ្នាលើសេវានីមួយៗ ដើម្បីប្រៀបធៀប។
