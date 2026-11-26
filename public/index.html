@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Song Studio — បង្កើតចម្រៀង AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf7f2;--card:#fff;--ink:#241c15;--mute:#7a6e63;--line:#e7dfd4;--acc:#c2410c;--acc2:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#17130f;--card:#221c16;--ink:#f3ece3;--mute:#a79a8c;--line:#3a3128;--acc:#fb923c;--acc2:#1a1008}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Khmer",system-ui,sans-serif;line-height:1.7}
+main{max-width:720px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:1.6rem;margin:0 0 4px}.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+label{display:block;font-weight:600;font-size:.9rem;margin:12px 0 4px}label:first-child{margin-top:0}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:80px;resize:vertical}#lyrics{min-height:260px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:520px){.row{grid-template-columns:1fr}}
+button.go{width:100%;margin-top:16px;padding:12px;border:0;border-radius:12px;background:var(--acc);color:var(--acc2);font:inherit;font-weight:700;font-size:1rem;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
+audio{width:100%;margin-top:12px}
+a.dl{display:inline-block;margin-top:8px;color:var(--acc)}
+.err{color:#dc2626}[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>🎵 Song Studio</h1>
+<p class="sub">តែងអត្ថបទដោយ Claude → បង្កើតចម្រៀងមានសំឡេងច្រៀងដោយ AI តន្ត្រី</p>
+
+<div class="card">
+<label for="pw">ពាក្យសម្ងាត់កម្មវិធី</label>
+<input id="pw" type="password" autocomplete="current-password">
+</div>
+
+<div class="card">
+<label for="topic">ប្រធានបទ</label>
+<textarea id="topic" placeholder="ឧ. ស្រលាញ់ម្តាយ, ផ្ទះកំណើត…"></textarea>
+<div class="row">
+<div><label for="genre">ប្រភេទតន្ត្រី</label><select id="genre"><option>Pop</option><option>Rock</option><option>Ballad</option><option>Hip-hop</option><option>Folk</option><option>EDM</option><option>Acoustic</option></select></div>
+<div><label for="mood">អារម្មណ៍</label><select id="mood"><option>happy</option><option>sad</option><option>nostalgic</option><option>inspiring</option><option>romantic</option><option>calm</option></select></div>
+</div>
+<div class="row">
+<div><label for="lang">ភាសាចម្រៀង</label><select id="lang"><option>Khmer</option><option>English</option></select></div>
+<div><label for="len">ប្រវែងអត្ថបទ</label><select id="len"><option value="short">ខ្លី</option><option value="mid" selected>មធ្យម</option><option value="long">វែង</option></select></div>
+</div>
+<button class="go" id="btnLyrics">✨ ១. តែងអត្ថបទចម្រៀង</button>
+<p id="m1" class="sub"></p>
+</div>
+
+<div class="card" id="step2" hidden>
+<label for="title">ចំណងជើង</label><input id="title">
+<label for="lyrics">អត្ថបទ (អាចកែបាន)</label><textarea id="lyrics"></textarea>
+<label for="style">ស្ទីលតន្ត្រី (English)</label><input id="style">
+<label for="secs">ប្រវែងចម្រៀង (វិនាទី, 30–150)</label><input id="secs" type="number" min="30" max="150" value="90">
+<button class="go" id="btnMusic">🎤 ២. បង្កើតចម្រៀងមានសំឡេង</button>
+<p id="m2" class="sub"></p>
+<audio id="player" controls hidden></audio>
+<a id="dl" class="dl" hidden>⬇ ទាញយក MP3</a>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+$("pw").value=sessionStorage.getItem("pw")||"";
+async function call(url,body){
+  sessionStorage.setItem("pw",$("pw").value);
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-app-password":$("pw").value},body:JSON.stringify(body)});
+  if(!r.ok){let e="មានបញ្ហា";try{e=(await r.json()).error||e}catch(_){}throw new Error(e)}
+  return r;
+}
+function msg(id,t,err){const el=$(id);el.textContent=t;el.className="sub"+(err?" err":"")}
+
+$("btnLyrics").onclick=async()=>{
+  if(!$("topic").value.trim())return $("topic").focus();
+  $("btnLyrics").disabled=true;msg("m1","កំពុងតែង…");
+  try{
+    const r=await call("/api/lyrics",{topic:$("topic").value,genre:$("genre").value,mood:$("mood").value,lang:$("lang").value,length:$("len").value});
+    const d=await r.json();
+    $("title").value=d.title||"";$("lyrics").value=d.lyrics||"";$("style").value=d.style||"";
+    $("step2").hidden=false;msg("m1","");
+  }catch(e){msg("m1",e.message,true)}
+  $("btnLyrics").disabled=false;
+};
+
+$("btnMusic").onclick=async()=>{
+  $("btnMusic").disabled=true;msg("m2","កំពុងបង្កើតចម្រៀង (អាចចំណាយពេល 1–3 នាទី)…");
+  $("player").hidden=true;$("dl").hidden=true;
+  try{
+    const r=await call("/api/music",{lyrics:$("lyrics").value,style:$("style").value,lang:$("lang").value,seconds:$("secs").value});
+    const url=URL.createObjectURL(await r.blob());
+    $("player").src=url;$("player").hidden=false;
+    $("dl").href=url;$("dl").download=($("title").value||"song")+".mp3";$("dl").hidden=false;
+    msg("m2","រួចរាល់ ✓");
+  }catch(e){msg("m2",e.message,true)}
+  $("btnMusic").disabled=false;
+};
+</script>
+</body>
+</html>
